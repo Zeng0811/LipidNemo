@@ -11,28 +11,23 @@ warnings.filterwarnings("ignore")
 
 # ================= Configuration =================
 # Model file path (the previously saved .pkl)
-PIPELINE_PATH = r'/home/zengjunjie/tabpfn/model/lnp_transductive-文献配方7-Seed42_bionemo_80D.pkl'
-#PIPELINE_PATH = r'/home/zengjunjie/tabpfn/model/lnp_transductive_bionemo-FT_80D.pkl'   # Three internal formulations validated in vivo
+PIPELINE_PATH = r'$pwd/model/LNP-external-LipidNemo.pkl'
+#PIPELINE_PATH = r'$pwd/model/LNP-internal-LipidNemo.pkl'   # Three internal formulations validated in vivo
 
-# Embedding file for new data (2565 dimensions)
+# Embedding file for new data
 # Note: This must be the raw features generated using the corresponding embedding method, prior to PCA
-NEW_DATA_PATH = r'/home/zengjunjie/tabpfn/LNP-文献配方/LipidNemo_embedding/LNP-external.npy' 
-#NEW_DATA_PATH = r'/root/autodl-tmp/TabPFN/LNP-neibu/LNP-内部-ft-final.npy' 
-#NEW_DATA_PATH = r'/root/autodl-tmp/TabPFN/LNP-内部-bionemo.npy' 
-#NEW_DATA_PATH = r'/root/autodl-tmp/TabPFN/LNP-内部-grover_large.npz'
-#NEW_DATA_PATH = r'/root/autodl-tmp/TabPFN/LNP-内部-grover_large.npz'
-#NEW_DATA_PATH = r'/root/autodl-tmp/TabPFN/LNP-内部-rdkit_fp.csv'
-#NEW_DATA_PATH = r'/root/autodl-tmp/TabPFN/LNP-内部-padel_fp.csv'
+NEW_DATA_PATH = r'$pwd/data/LNP-external-ft-final.npy' 
+#NEW_DATA_PATH = r'$pwd/data/LNP-internal-ft-final.npy' 
 
-# (Optional) If there is a corresponding CSV containing formulation names for result display
-NEW_DATA_CSV = r'/home/zengjunjie/tabpfn/LNP-文献配方/LNP-external.CSV'
+NEW_DATA_CSV = r'$pwd/data/LNP-external.CSV'
+#NEW_DATA_CSV = r'$pwd/data/LNP-internal.CSV'
 
-OUTPUT_PATH = r'/home/zengjunjie/tabpfn/result'  # Prediction results output directory
+OUTPUT_PATH = r'$pwd/result'  # Prediction results output directory
 # =======================================
 
 def load_feature_file(file_path):
     """
-    Load feature files, supporting .npy, .npz, and .csv formats.
+    Intelligently load feature files, supporting .npy, .npz, and .csv formats.
     Returns: numpy.ndarray (N_samples, N_features)
     """
     if not os.path.exists(file_path):
@@ -176,7 +171,7 @@ def predict_new_formulations():
     for idx, cls_name in enumerate(classes):
         result_df[f"Prob_{cls_name}"] = probabilities[:, idx]
 
-    out_file = os.path.join(OUTPUT_PATH, "lnp_transductive-文献配方7-Seed42_bionemo_80D.csv")
+    out_file = os.path.join(OUTPUT_PATH, "LNP-external-LipidNemo.csv")
     result_df.to_csv(out_file, index=False)
     print("="*50)
     print(f"Complete prediction results saved to: {out_file}")
