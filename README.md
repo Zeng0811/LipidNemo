@@ -88,6 +88,12 @@ This process utilizes [SwissLipids](https://www.swisslipids.org/#/), a public li
 ```
 Users are required to download SwissLipids manually and split the data into 98% train, 1% validation, and 1% test.
 
+You can also fine-tune LLM via a SLURM script:
+```bash
+sbatch $pwd/apptainer_testing.slurm -p $pwd/LNP_fine-tuning.prop
+
+```
+
 ### 3. Extract LipidNemo Embeddings
 To embed and concatenate the LNP formulation,run the noteboke Embedding-LipidNemo.ipynb in the container.
 
