@@ -4,8 +4,6 @@
 #SBATCH --gpus-per-node=2     # n gpus per machine <required>
 #SBATCH --cpus-per-gpu=4
 #SBATCH -w gpu05
-#SBATCH --mail-type=FAIL
-#SBATCH --mail-user=792822846@qq.com
 #SBATCH --time=1000:00:00
 #SBATCH --job-name=LNPnemo_pt
 
