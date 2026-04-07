@@ -27,21 +27,14 @@ Model_DIR = r'$(pwd)/model' # save_dir of the pkl model
 
 # 1. Embeddings of training data
 EMBEDDING_FILES = {
-    "1. Bionemo-FT (2565 D)": "/home/zengjunjie/tabpfn/LNP-447-ft-final.npy",
-    #"2. Bionemo (2565 D)": "/home/zengjunjie/tabpfn/LNP-447-bionemo.npy",
-    #"3. Grover_base (16005 D)": "/home/zengjunjie/tabpfn/LNP-447-grover.npz",
-    #"4. Grover_large (24005 D)": "/home/zengjunjie/tabpfn/LNP-447-grover.npz",
-    #"5. Rdkit (10245 D)": "/home/zengjunjie/tabpfn/LNP-447-rdkit.csv",
-    #"6. Padel_descriptor (4410 D)": "/home/zengjunjie/tabpfn/LNP-447-padel.csv"
+    "1. Bionemo-FT (2565 D)": "/LipidNemo/data/LNP-447-ft-final.npy",
+    #"2. Bionemo (2565 D)": "/LipidNemo/data/LNP-447-bionemo.npy",
 }
 
 # 2. Embeddings of new samples for PCA
-#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-neibu/LNP-internal-ft-final.npy'
-NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-文献配方/LipidNemo_embedding/LNP-external-ft-final.npy'
-#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-external-grover.npz'
-#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-external-rdkit.csv'
-#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-external-padel.csv'
-#NEW_DATA_NPY_PATH = ""
+NEW_DATA_NPY_PATH = r'/LipidNemo/data/LNP-external-ft-final.npy'
+#NEW_DATA_NPY_PATH = r'/LipidNemo/data/LNP-internal-ft-final.npy'
+
 
 TARGET_COLUMN = "Organ"
 TARGET_CLASSES = ["Liver", "Lung", "Spleen", "None"]
@@ -49,7 +42,6 @@ TARGET_CLASSES = ["Liver", "Lung", "Spleen", "None"]
 # PCA
 PCA_N_COMPONENTS = 80  
 RANDOM_SEED = 42
-
 
 TabPFN_PARAMS = {
     'ignore_pretraining_limits': True, 
@@ -86,8 +78,7 @@ def data_load(file_path):
                 print(f" (Extracted key: {keys[0]})", end="")
                 
         elif ext == '.csv':
-            # .csv usually has no header, pure numeric matrix
-            # If your CSV has a header, please change header=None to header=0
+            # If CSV has a header, please change header=None to header=0
             df = pd.read_csv(file_path, header=0)
             data = df.values.astype(np.float32)
             
@@ -152,7 +143,7 @@ def evaluate_model(name, filename, df_labels):
     if X_new_raw is not None:
         X_new_emb = X_new_raw[:, :emb_dim]
     
-    # Aggressive cleaning (prevent NaN/Inf errors)
+    # Prevent NaN/Inf errors
     X_train_emb = np.nan_to_num(X_train_emb, nan=0.0, posinf=1e4, neginf=-1e4).astype(np.float32)
     X_test_emb  = np.nan_to_num(X_test_emb, nan=0.0, posinf=1e4, neginf=-1e4).astype(np.float32)
     if X_new_raw is not None:
@@ -217,7 +208,7 @@ def evaluate_model(name, filename, df_labels):
         "target_classes": TARGET_CLASSES
     }
     
-    save_name = f"lnp_transductive-文献配方7-Seed{RANDOM_SEED}_bionemo_{PCA_N_COMPONENTS}D.pkl"
+    save_name = f"LNP-external-LipidNemo.pkl"
     save_path = os.path.join(Model_DIR, save_name)
     joblib.dump(save_package, save_path)
     print(f" Model pipeline saved to: {save_path}")
