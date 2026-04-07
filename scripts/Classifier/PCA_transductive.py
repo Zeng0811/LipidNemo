@@ -27,19 +27,20 @@ Model_DIR = r'$(pwd)/model' # save_dir of the pkl model
 
 # 1. Embeddings of training data
 EMBEDDING_FILES = {
-    "1. Bionemo-FT": "/home/zengjunjie/tabpfn/LNP-447-ft-final.npy",
-    #"2. Bionemo": "/home/zengjunjie/tabpfn/LNP-448-bionemo.npy",
-    #"3. Grover": "/home/zengjunjie/tabpfn/LNP-448-grover.npz",
-    #"5. Rdkit": "/home/zengjunjie/tabpfn/LNP-448-rdkit.csv",
-    #"6. Padel_descriptor": "/home/zengjunjie/tabpfn/LNP-448-padel.csv"
+    "1. Bionemo-FT (2565 D)": "/home/zengjunjie/tabpfn/LNP-447-ft-final.npy",
+    #"2. Bionemo (2565 D)": "/home/zengjunjie/tabpfn/LNP-447-bionemo.npy",
+    #"3. Grover_base (16005 D)": "/home/zengjunjie/tabpfn/LNP-447-grover.npz",
+    #"4. Grover_large (24005 D)": "/home/zengjunjie/tabpfn/LNP-447-grover.npz",
+    #"5. Rdkit (10245 D)": "/home/zengjunjie/tabpfn/LNP-447-rdkit.csv",
+    #"6. Padel_descriptor (4410 D)": "/home/zengjunjie/tabpfn/LNP-447-padel.csv"
 }
 
 # 2. Embeddings of new samples for PCA
-#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-neibu/LNP-内部-ft-final.npy'
-NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-文献配方/LipidNemo_embedding/LNP-文献配方-7.npy'
-#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-内部-grover_large.npz'
-#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-内部-rdkit_fp.csv'
-#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-内部-padel_fp.csv'
+#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-neibu/LNP-internal-ft-final.npy'
+NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-文献配方/LipidNemo_embedding/LNP-external-ft-final.npy'
+#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-external-grover.npz'
+#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-external-rdkit.csv'
+#NEW_DATA_NPY_PATH = r'/home/zengjunjie/tabpfn/LNP-external-padel.csv'
 #NEW_DATA_NPY_PATH = ""
 
 TARGET_COLUMN = "Organ"
@@ -60,61 +61,61 @@ TabPFN_PARAMS = {
 # =================================================
 def data_load(file_path):
     """
-    智能加载函数：自动识别 .npy, .npz, .csv
+    Smart loading function: automatically recognize .npy, .npz, .csv
     """
     if not os.path.exists(file_path):
         return None
         
     ext = os.path.splitext(file_path)[-1].lower()
     
-    print(f"   📂 检测到格式 {ext}: 正在读取...", end="")
+    print(f"   Detected format {ext}: Reading...", end="")
     
     try:
         if ext == '.npy':
             data = np.load(file_path)
         
         elif ext == '.npz':
-            # .npz 是压缩包，通常我们取第一个数组
+            # .npz is a compressed archive, usually we take the first array
             with np.load(file_path) as loaded:
-                # 尝试获取默认的 'arr_0'，或者是压缩包里的第一个键
+                # Try to get the default 'arr_0', or the first key in the archive
                 keys = list(loaded.keys())
                 if 'arr_0' in keys:
                     data = loaded['arr_0']
                 else:
-                    data = loaded[keys[0]] # 取第一个
-                print(f" (提取键: {keys[0]})", end="")
+                    data = loaded[keys[0]] # Take the first one
+                print(f" (Extracted key: {keys[0]})", end="")
                 
         elif ext == '.csv':
-            # .csv 通常没有表头，纯数字矩阵
-            # 如果你的CSV有表头(header)，请把 header=None 改为 header=0
+            # .csv usually has no header, pure numeric matrix
+            # If your CSV has a header, please change header=None to header=0
             df = pd.read_csv(file_path, header=0)
             data = df.values.astype(np.float32)
             
         else:
-            print(f" ❌ 不支持的格式: {ext}")
+            print(f" Unsupported format: {ext}")
             return None
             
-        print(" ✅")
+        print(" Done.")
         return data
         
     except Exception as e:
-        print(f" ❌ 读取失败: {e}")
+        print(f" Failed to read: {e}")
         return None
 
 def evaluate_model(name, filename, df_labels):
     print(f"\n" + "="*60)
-    print(f"🔄 正在处理: {name} (直推式 PCA 模式)")
+    print(f" Processing: {name} (Transductive PCA Mode)")
     print("="*60)
     
-    # --- 1. 加载训练数据 ---
+    # --- 1. Load training data ---
     f_path = os.path.join(RESULTS_DIR, filename)
     if not os.path.exists(f_path): 
-        print(f"   ⚠️ 文件不存在: {filename}"); return None
+        print(f"   File not found: {filename}"); return None
 
     X_all = data_load(f_path)
     if X_all is None: return None
 
-    # 对齐与清洗数据
+    # Align and clean data
     curr_df = df_labels.copy()
     if len(curr_df) != len(X_all):
         m = min(len(curr_df), len(X_all))
@@ -125,25 +126,25 @@ def evaluate_model(name, filename, df_labels):
     y_filt = curr_df.loc[mask, TARGET_COLUMN].values
     X_filt = X_all[mask.values]
 
-    # --- 2. 加载新样本数据 ---
+    # --- 2. Load new sample data ---
     if os.path.exists(NEW_DATA_NPY_PATH):
         X_new_raw = data_load(NEW_DATA_NPY_PATH)
-        print(f"   ✅ 成功加载 {X_new_raw.shape[0]} 个新样本用于 PCA 辅助定位")
+        print(f"   Successfully loaded {X_new_raw.shape[0]} new samples for PCA alignment")
     else:
-        print(f"   ⚠️ 未找到新样本文件: {NEW_DATA_NPY_PATH}，将使用普通 PCA")
+        print(f"   New sample file not found: {NEW_DATA_NPY_PATH}, will use standard PCA")
         X_new_raw = None
 
-    # --- 3. 划分训练集和测试集 ---
-    # 这里我们只划分一次，不做交叉验证，以节省资源并专注最终模型
+    # --- 3. Split training and testing sets ---
+    # Here we only split once, no cross-validation, to save resources and focus on the final model
     X_train_raw, X_test_raw, y_train, y_test = train_test_split(
         X_filt, y_filt, test_size=0.1, random_state=RANDOM_SEED, stratify=y_filt
     )
-    print(f"   - 训练集维度: {X_train_raw.shape}")
+    print(f"   - Training set dimensions: {X_train_raw.shape}")
 
-    # ================= 4. 直推式 PCA (Transductive PCA) =================
-    print(f"\n🚀 开始直推式 PCA 处理 (PCA={PCA_N_COMPONENTS})...")
+    # ================= 4. Transductive PCA =================
+    print(f"\n Starting Transductive PCA processing (PCA={PCA_N_COMPONENTS})...")
     
-    # 拆分 Embedding (前N-5) 和 Ratios (后5)
+    # Split Embedding (first N-5) and Ratios (last 5)
     emb_dim = X_train_raw.shape[1] - 5
     
     X_train_emb = X_train_raw[:, :emb_dim]
@@ -151,17 +152,14 @@ def evaluate_model(name, filename, df_labels):
     if X_new_raw is not None:
         X_new_emb = X_new_raw[:, :emb_dim]
     
-    X_train_rat = X_train_raw[:, emb_dim:]
-    X_test_rat  = X_test_raw[:, emb_dim:]
-
-    # 强力清洗 (防止 NaN/Inf 报错)
+    # Aggressive cleaning (prevent NaN/Inf errors)
     X_train_emb = np.nan_to_num(X_train_emb, nan=0.0, posinf=1e4, neginf=-1e4).astype(np.float32)
     X_test_emb  = np.nan_to_num(X_test_emb, nan=0.0, posinf=1e4, neginf=-1e4).astype(np.float32)
     if X_new_raw is not None:
         X_new_emb = np.nan_to_num(X_new_emb, nan=0.0, posinf=1e4, neginf=-1e4).astype(np.float32)
 
-    # A. Scaler (标准化)
-    # 注意：Scaler 应该只 Fit 训练集，保持数据分布的基准
+    # A. Scaler (Standardization)
+    # Note: Scaler should only fit the training set to maintain the baseline of data distribution
     scaler = StandardScaler()
     X_train_emb = scaler.fit_transform(X_train_emb)
     X_test_emb  = scaler.transform(X_test_emb)
@@ -169,47 +167,47 @@ def evaluate_model(name, filename, df_labels):
     if X_new_raw is not None:
         X_new_emb = scaler.transform(X_new_emb)
         # 
-        # 🔥 关键点：将训练集和新样本垂直拼接，一起喂给 PCA fit 🔥
+        # Key point: Vertically stack the training set and new samples, feed them together to PCA fit
         X_for_pca_fit = np.vstack([X_train_emb, X_new_emb])
-        print("   👉 PCA Fit 策略: 混合模式 (训练集 + 新样本)")
+        print("   PCA Fit Strategy: Mixed mode (Training set + New samples)")
     else:
         X_for_pca_fit = X_train_emb
-        print("   👉 PCA Fit 策略: 普通模式 (仅训练集)")
+        print("   PCA Fit Strategy: Standard mode (Training set only)")
 
     # B. PCA Fit
     n_comp_actual = min(PCA_N_COMPONENTS, X_for_pca_fit.shape[0], X_for_pca_fit.shape[1])
     pca = PCA(n_components=n_comp_actual, random_state=RANDOM_SEED)
-    pca.fit(X_for_pca_fit)  # 这里 Fit 了所有数据
+    pca.fit(X_for_pca_fit)  # Fit all data here
 
     # C. PCA Transform
     X_train_pca = pca.transform(X_train_emb)
     X_test_pca  = pca.transform(X_test_emb)
     
-    # D. 拼接回 Ratios
-    # 清洗 Ratio
+    # D. Concatenate Ratios back
+    # Clean Ratio
     X_train_rat = np.nan_to_num(X_train_rat, nan=0.0, posinf=1.0, neginf=0.0)
     X_test_rat  = np.nan_to_num(X_test_rat, nan=0.0, posinf=1.0, neginf=0.0)
     
     X_train_final = np.hstack([X_train_pca, X_train_rat])
     X_test_final  = np.hstack([X_test_pca, X_test_rat])
     
-    print(f"   - 最终训练输入维度: {X_train_final.shape}")
+    print(f"   - Final training input dimensions: {X_train_final.shape}")
 
-    # ================= 5. 训练模型 =================
-    print(f"🚀 开始训练 TabPFN...")
+    # ================= 5. Train Model =================
+    print(f" Starting TabPFN training...")
     
-    # ⚠️ 注意：这里去掉了 'path' 参数，因为之前的报错显示它不支持
-    # AutoGluon 会自动在当前目录下生成 'AutogluonModels' 文件夹
-    # 我们不会删除它，以便后续使用
+    # Note: The 'path' parameter is removed here because previous errors showed it is not supported
+    # AutoGluon will automatically generate an 'AutogluonModels' folder in the current directory
+    # We will not delete it for subsequent use
     final_clf = AutoTabPFNClassifier(**TabPFN_PARAMS)
     final_clf.fit(X_train_final, y_train)
 
-    # 6. 预测测试集
+    # 6. Predict test set
     y_pred = final_clf.predict(X_test_final)
     test_acc = accuracy_score(y_test, y_pred)
-    print(f"   🏆 内部测试集准确率: {test_acc:.4f}")
+    print(f"   Internal test set accuracy: {test_acc:.4f}")
 
-    # 7. 💾 保存模型流水线
+    # 7. Save model pipeline
     save_package = {
         "scaler": scaler,        
         "pca": pca,             
@@ -222,13 +220,13 @@ def evaluate_model(name, filename, df_labels):
     save_name = f"lnp_transductive-文献配方7-Seed{RANDOM_SEED}_bionemo_{PCA_N_COMPONENTS}D.pkl"
     save_path = os.path.join(Model_DIR, save_name)
     joblib.dump(save_package, save_path)
-    print(f"✅ 模型流水线已保存至: {save_path}")
-    print(f"⚠️  重要：训练生成的 'AutogluonModels' 文件夹已保留。")
+    print(f" Model pipeline saved to: {save_path}")
+    print(f" Important: The 'AutogluonModels' folder generated during training has been retained.")
 
     return {"Name": name, "Test_Acc": test_acc}
 
 def main():
-    if torch.cuda.is_available(): print(f"✅ GPU 就绪: {torch.cuda.get_device_name(0)}")
+    if torch.cuda.is_available(): print(f" GPU ready: {torch.cuda.get_device_name(0)}")
     df_labels = pd.read_csv(DATA_PATH)
 
     results = []
@@ -237,7 +235,7 @@ def main():
         if res: results.append(res)
 
     print("\n" + "="*80)
-    print(f"{'🏆 FINAL RESULTS 🏆':^80}")
+    print(f"{' FINAL RESULTS ':^80}")
     print("="*80)
     for r in results:
         print(f"{r['Name']:<25} | Test Acc: {r['Test_Acc']:.4f}")
