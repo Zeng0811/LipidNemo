@@ -28,7 +28,7 @@ We recommend using [Conda](https://docs.conda.io/en/latest/) to manage your envi
 
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/](https://github.com/)[your-username]/LipidNemo.git
+git clone https://github.com/Zeng0811/LipidNemo.git
 cd LipidNemo
 
 # 2. Create a virtual environment
