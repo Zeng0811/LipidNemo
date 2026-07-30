@@ -6,10 +6,10 @@
 ## 📌 Overview
 **LipidNemo** is an advanced machine learning framework designed to accurately predict the *in vivo* organ tropism (Liver, Lung, Spleen, or None) of Lipid Nanoparticles (LNPs). 
 
-By leveraging a fine-tuned Large Language Model (LLM) to extract high-dimensional molecular representations from LNP formulations (SMILES and molar ratios), and integrating a powerful downstream classifier (TabPFN / 2D Transformer), LipidNemo provides a high-throughput, AI-assisted tool for the rational design and optimization of LNPs for targeted drug delivery.
+By leveraging a domain_adapted Large Language Model (LLM) to extract high-dimensional molecular representations from LNP formulations (SMILES and molar ratios), and integrating a powerful downstream classifier (TabPFN / 2D Transformer), LipidNemo provides a high-throughput, AI-assisted tool for the rational design and optimization of LNPs for targeted drug delivery.
 
 ### ✨ Key Features
-- **SMILES-to-Embedding Extraction:** Utilizes a fine-tuned LLM to convert LNP formulation structures into robust numerical embeddings.
+- **SMILES-to-Embedding Extraction:** Utilizes a domain_adapted LLM to convert LNP formulation structures into robust numerical embeddings.
 - **Transductive Learning Optimization:** Incorporates transductive PCA to allow the model to perceive target data distributions, significantly enhancing generalization capabilities on unseen LNPs.
 - **High Accuracy & Interpretability:** Supports diverse downstream classifiers with comprehensive evaluations (Accuracy, ROC-AUC, and Confusion Matrices).
 
@@ -39,8 +39,8 @@ conda activate lipidnemo
 pip install -r requirements.txt
 ```
 
-## Fine-tuning the LLM
-The core molecular representation model of LipidNemo is inherited from MegaMolBART within BioNeMo by NVIDIA. To ensure a reproducible environment and avoid complex dependency issues, we highly recommend utilizing the official BioNeMo Docker container for LLM fine-tuning and embedding extraction.
+## domain_adapted the LLM
+The core molecular representation model of LipidNemo is inherited from MegaMolBART within BioNeMo by NVIDIA. To ensure a reproducible environment and avoid complex dependency issues, we highly recommend utilizing the official BioNeMo Docker container for LLM domain_adapted and embedding extraction.
 
 ### 1. Launch the Docker Container
 Ensure you have Docker and the NVIDIA Container Toolkit installed. You will also need your personal NGC API Key to pull the framework. 
@@ -66,7 +66,7 @@ docker run --gpus all -it --name LipidNemo_LLM --rm \
 Replace "YOUR_NGC_API_KEY" with your actual NVIDIA NGC API key. You can create your own Key in [NGC](https://catalog.ngc.nvidia.com/) and download the MegaMolBART base model, following the instruction from [BioNeMo](https://docs.nvidia.com/bionemo-framework/latest/main/getting-started/access-startup/).
 
 
-### 2. Excecute fine-tuning
+### 2. Excecute continual pretraining
 ```bash
 python /workspace/bionemo/examples/molecule/megamolbart/my_pretrain.py \
     --config-path=/workspace/bionemo/examples/molecule/megamolbart/conf \
@@ -77,7 +77,7 @@ python /workspace/bionemo/examples/molecule/megamolbart/my_pretrain.py \
     trainer.accelerator='gpu' \
     restore_from_path=/workspace/bionemo/models/MegaMolBART.nemo
 ```
-This process utilizes [SwissLipids](https://www.swisslipids.org/#/), a public lipid library for fine-tuning, as illustrated in my_pretrain_base.yaml:
+This process utilizes [SwissLipids](https://www.swisslipids.org/#/), a public lipid library for continual pretraining, as illustrated in my_pretrain_base.yaml:
 ```
   data:
     dataset_path: /data # parent directory for data, contains train / val / test folders. Needs to be writeable for index creation.
