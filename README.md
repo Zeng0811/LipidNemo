@@ -16,7 +16,7 @@ By leveraging a domain_adapted Large Language Model (LLM) to extract high-dimens
 ---
 
 ## 🖼️ Architecture
-<img width="1256" height="538" alt="image" src="https://github.com/user-attachments/assets/86a2e9f6-5a07-4cb1-baf1-2f74e834794c" />
+<img width="1256" height="538" alt="image" src="https://github.com/Zeng0811/LipidNemo/blob/main/graphical%20abstract.png" />
 
 > Figure 1: Schematic overview of the LipidNemo pipeline.
 
