@@ -84,7 +84,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model_path",
         type=Path,
-        default=repo_dir / "TabPFNModels" / "m-20260707_114852_406642",
+        default=repo_dir / "TabPFNModels" / "model_id",
         help=(
             "Path to a trained PCA-based model. Supported inputs are an "
             "AutoGluon predictor directory with utils/data/X.pkl or a saved "
