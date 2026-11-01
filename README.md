@@ -87,7 +87,6 @@ This process utilizes [SwissLipids](https://www.swisslipids.org/#/), a public li
       val: lipids_smile_val_filtered
 ```
 Users are required to download SwissLipids manually and split the data into 98% train, 1% validation, and 1% test.
-```
 
 ### 3. Extract LipidNemo Embeddings
 To embed and concatenate the LNP formulation,run the noteboke Embedding_LipidNemo-multi_pooling.py in the container.
@@ -95,6 +94,7 @@ Mean pooling is used as the default pooling methods.
 
 ## 2D transformer-based classifier for organ selectivity prediction
 To map the high-dimensional latent embeddings extracted by the LLM to macroscopic biological behaviors, LipidNemo utilizes a 2D Transformer-based classifier. Unlike traditional 1D models that struggle with the complex, non-linear combinatorial effects of multi-component nanoparticles, 2D architecture is specifically designed to understand the formulation as an integrated delivery system. Herein, TabPFN is used to predict the organ selectivity of LNPs.
+Other baseline models are integrated into the script ```PCA_transductive.py```. You can select them via the ```--model_type``` argument.
 ```
 conda activate lipidnemo
 python python PCA_transductive.py \
@@ -106,5 +106,4 @@ python python PCA_transductive.py \
   --val_ratio 0.1 \
   --test_ratio 0.1 \
   --results_dir $(pwd)/results
-
 ```
