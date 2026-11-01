@@ -16,7 +16,7 @@ By leveraging a domain_adapted Large Language Model (LLM) to extract high-dimens
 ---
 
 ## 🖼️ Architecture
-<img width="1256" height="538" alt="image" src="https://github.com/Zeng0811/LipidNemo/blob/main/graphical%20abstract.png" />
+<img width="1256" height="538" alt="image" src="graphical abstract.png" />
 
 > Figure 1: Schematic overview of the LipidNemo pipeline.
 
@@ -90,11 +90,21 @@ Users are required to download SwissLipids manually and split the data into 98% 
 ```
 
 ### 3. Extract LipidNemo Embeddings
-To embed and concatenate the LNP formulation,run the noteboke Embedding-LipidNemo.ipynb in the container.
+To embed and concatenate the LNP formulation,run the noteboke Embedding_LipidNemo-multi_pooling.py in the container.
+Mean pooling is used as the default pooling methods.
 
 ## 2D transformer-based classifier for organ selectivity prediction
 To map the high-dimensional latent embeddings extracted by the LLM to macroscopic biological behaviors, LipidNemo utilizes a 2D Transformer-based classifier. Unlike traditional 1D models that struggle with the complex, non-linear combinatorial effects of multi-component nanoparticles, 2D architecture is specifically designed to understand the formulation as an integrated delivery system. Herein, TabPFN is used to predict the organ selectivity of LNPs.
 ```
 conda activate lipidnemo
-python python PCA_transductive.py && python classifier.py
+python python PCA_transductive.py \
+  --model_type tabpfn \
+  --embedding_train $(pwd)/LNP-447-lipidnemo.npy \
+  --new_data_npy $(pwd)/LNP-external-lipidnemo.npy \
+  --eval_split val \
+  --pca_n 20 \
+  --val_ratio 0.1 \
+  --test_ratio 0.1 \
+  --results_dir $(pwd)/results
+
 ```
